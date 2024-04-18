@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.Maui.Controls;
-using static Java.Util.Jar.Attributes;
+using System.Drawing;
+using System.IO;
 
 namespace RestaurantManager.Components
 {
@@ -24,8 +25,8 @@ namespace RestaurantManager.Components
                 var command = connection.CreateCommand();
                 command.CommandText =
                 @"
-                    CREATE TABLE employees(
-                        id INTEGER NOT NULL AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS employees(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                         first_name TEXT NOT NULL,
                         last_name TEXT NOT NULL,
                         email TEXT NOT NULL,
@@ -33,20 +34,18 @@ namespace RestaurantManager.Components
                         age INTEGER NOT NULL
                     );
 
-                    CREATE TABLE Food(
-                        id INTEGER NOT NULL AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS Food(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL,
                         cost REAL NOT NULL,
                         description TEXT NOT NULL,
                         photo BLOB NOT NULL
                     );
 
-                    CREATE TABLE Order(
-                        id INTEGER NOT NULL AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS  FoodOrder(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                         item TEXT NOT NULL
                     );
-
-                    
                 ";
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -57,7 +56,7 @@ namespace RestaurantManager.Components
 
         }
 
-        public List<Object> LoadDB(string databaseName)
+        public void LoadDB(string databaseName)
         {
             List<Object> Returnlist = new List<Object>();
 
@@ -67,17 +66,32 @@ namespace RestaurantManager.Components
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = 
+                command.CommandText =
                 @"
                     SELECT *
                     FROM employees
                     
                 ";
 
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var test = reader.GetString(0);
+
+                        Console.WriteLine($"Test ourput {test}!");
+                    }
+                }
+                connection.Close();
             }
+        }
 
         public void AddFoodItem(String foodname, Double foodcost, String description, Image image)
         {
+
+            byte[] imageBytes = (image); // Assume this converts ImageSource to byte array
+
+
             using (var connection = new SqliteConnection(DataBaseName))
             {
                 connection.Open();
@@ -118,5 +132,17 @@ namespace RestaurantManager.Components
         {
 
         }
-    }
+        //AI assisted code below
+        public byte[] ConvertImageToByteArray(Image image)
+        {
+            if (image == null)
+                return null;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                // Save the image to the MemoryStream in a specific format
+                image.Save(ms, ImageFormat.Png); // You can change the format as needed (JPEG, BMP, etc.)
+                return ms.ToArray();
+            }
+        }
 }
