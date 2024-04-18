@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using RestaurantManager.Components;
+using System.Drawing;
+using System.Reflection;
 
 namespace RestaurantManager
 {
@@ -14,7 +16,8 @@ namespace RestaurantManager
             Database database = new Database();
 
             database.CreateDB("test1");
-            database.AddFoodItem("Sushi", 23.59, "Delicious platter of sushi", new Image { Source = "/images/Sushi.png" });
+            database.AddFoodItem("test1","Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
+            database.LoadDBFood("test1");
         }
     }
 }

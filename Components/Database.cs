@@ -7,17 +7,15 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Maui.Controls;
 using System.Drawing;
 using System.IO;
+using System.Diagnostics;
 
 namespace RestaurantManager.Components
 {
     internal class Database
-    {
-
-        public String DataBaseName { get; set; }
-
+    { 
         public void CreateDB(string databaseName)
         {
-            DataBaseName = "Data Source=" + databaseName + ".db";
+            String DataBaseName = "Data Source=" + databaseName + ".db";
             using (var connection = new SqliteConnection(DataBaseName))
             {
                 connection.Open();
@@ -34,7 +32,7 @@ namespace RestaurantManager.Components
                         age INTEGER NOT NULL
                     );
 
-                    CREATE TABLE IF NOT EXISTS Food(
+                    CREATE TABLE IF NOT EXISTS food(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL,
                         cost REAL NOT NULL,
@@ -42,7 +40,7 @@ namespace RestaurantManager.Components
                         photo BLOB NOT NULL
                     );
 
-                    CREATE TABLE IF NOT EXISTS  FoodOrder(
+                    CREATE TABLE IF NOT EXISTS foodorder(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         item TEXT NOT NULL
                     );
@@ -56,11 +54,14 @@ namespace RestaurantManager.Components
 
         }
 
-        public void LoadDB(string databaseName)
+        public void LoadDBEmployee(string databaseName)
         {
+
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
             List<Object> Returnlist = new List<Object>();
 
-            using (var connection = new SqliteConnection(databaseName))
+            using (var connection = new SqliteConnection(DataBaseName))
             {
                 connection.Open();
 
@@ -70,7 +71,6 @@ namespace RestaurantManager.Components
                 @"
                     SELECT *
                     FROM employees
-                    
                 ";
 
                 using (var reader = command.ExecuteReader())
@@ -85,12 +85,10 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-
-        public void AddFoodItem(String foodname, Double foodcost, String description, Image image)
+        public void LoadDBFood(string databaseName)
         {
 
-            byte[] imageBytes = (image); // Assume this converts ImageSource to byte array
-
+            String DataBaseName = "Data Source=" + databaseName + ".db";
 
             using (var connection = new SqliteConnection(DataBaseName))
             {
@@ -100,14 +98,49 @@ namespace RestaurantManager.Components
 
                 command.CommandText =
                 @"
-                    INSERT INTO food (name, cost, description, photo)
+                    SELECT *
+                    FROM Food
+                ";
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var test = reader.GetString(0);
+
+                        Debug.WriteLine($"Test ourput {test}!");
+                    }
+                }
+                connection.Close();
+            }
+        }
+
+        public void LoadDBOrders(string databaseName)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+        }
+
+        public void AddFoodItem(String databaseName, String foodname, Double foodcost, String description, String image)
+        {
+
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                @"
+                    INSERT INTO food(name, cost, description, photo)
                     VALUES ($name, $cost, $description, $photo)
                 ";
                 command.Parameters.AddWithValue("$name", foodname);
                 command.Parameters.AddWithValue("$cost", foodcost);
                 command.Parameters.AddWithValue("$description", description);
-                command.Parameters.AddWithValue("$photo", image);
-                
+                command.Parameters.AddWithValue("$photo", ConvertImageToByteArray(image, foodname));
+
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -133,16 +166,22 @@ namespace RestaurantManager.Components
 
         }
         //AI assisted code below
-        public byte[] ConvertImageToByteArray(Image image)
+        public byte[] ConvertImageToByteArray(String imageName, String fileName)
         {
-            if (image == null)
-                return null;
 
-            using (MemoryStream ms = new MemoryStream())
+            String imagePath = AppDomain.CurrentDomain.BaseDirectory;
+            String actualPath = imagePath.Split("bin", StringSplitOptions.None)[0] + "Components/images/" + imageName;
+
+            Console.WriteLine(actualPath);
+
+            using (Stream imageStream = File.OpenRead(actualPath))
             {
-                // Save the image to the MemoryStream in a specific format
-                image.Save(ms, ImageFormat.Png); // You can change the format as needed (JPEG, BMP, etc.)
-                return ms.ToArray();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    imageStream.CopyToAsync(ms);
+                    return ms.ToArray();
+                }
             }
         }
+    }
 }
