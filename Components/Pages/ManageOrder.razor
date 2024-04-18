@@ -1,11 +1,49 @@
 ﻿@page "/manageorder"
 
-<h3>ManageOrder</h3>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div class="search-bar">
+    <input type="text" placeholder="Search food item..." name="search" />
+    <button @onclick="OnSearch"><i class="fa fa-search"></i></button>
+    <button @onclick="OnAddItem">Add Item</button>
+</div>
+
 
 <style>
+    .search-bar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
 
+    .search-bar input[type="text"] {
+        flex-grow: 1;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-bar button {
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 </style>
 
 @code {
-
+    private void OnSearch(MouseEventArgs e)
+    {
+        // Insert proper code here
+        throw new NotImplementedException();
+    }
+    private void OnAddItem(MouseEventArgs e)
+    {
+        // Insert proper code here
+        throw new NotImplementedException();
+    }
 }
