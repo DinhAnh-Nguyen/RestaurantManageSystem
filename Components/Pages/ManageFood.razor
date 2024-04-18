@@ -12,32 +12,26 @@
     <div class="add-item">
         <button>Add Item</button>
     </div>
-    <div>
-        <p>Test</p>
-    </div>
 </div>
 
 <style>
     .topbar {
         display: flex;
+        justify-content: space-between; /* Align items at the start and end */
+        flex-wrap: nowrap; /* Prevent items from wrapping to a new line */
+        padding: 10px; /* Add some padding for better spacing */
     }
 
     .search-container {
-        flex: 4;
-    }
-
-    .search-container input {
-        width: 450px;
-    }
-
-    .add-item {
-        flex: 1;
+        display: flex;
+        flex-grow: 1; /* Allow the search container to grow to take up remaining space */
     }
 
     .add-item button {
-		width: 150px;
+        width: 150px;
     }
 </style>
+
 
 @code {
 

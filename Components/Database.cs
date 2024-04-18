@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Maui.Controls;
-using System.Drawing;
 using System.IO;
+using Microsoft.Data.Sqlite;       
+using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Controls;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace RestaurantManager.Components
 {
     internal class Database
     {
-
-        public String DataBaseName { get; set; }
+        private String _databaseName;
 
         public void CreateDB(string databaseName)
         {
-            DataBaseName = "Data Source=" + databaseName + ".db";
-            using (var connection = new SqliteConnection(DataBaseName))
+            _databaseName = $"Data Source={databaseName}.db";
+            using (var connection = new SqliteConnection(_databaseName))
             {
                 connection.Open();
 
@@ -48,9 +48,9 @@ namespace RestaurantManager.Components
                     );
                 ";
                 command.ExecuteNonQuery();
-                connection.Close();
             }
         }
+
         public void DeleteDB(string databaseName)
         {
 
@@ -58,60 +58,51 @@ namespace RestaurantManager.Components
 
         public void LoadDB(string databaseName)
         {
-            List<Object> Returnlist = new List<Object>();
-
-            using (var connection = new SqliteConnection(databaseName))
+            using (var connection = new SqliteConnection($"Data Source={databaseName}.db"))
             {
                 connection.Open();
-
                 var command = connection.CreateCommand();
-
-                command.CommandText =
-                @"
-                    SELECT *
-                    FROM employees
-                    
-                ";
+                command.CommandText = "SELECT * FROM employees";
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
                         var test = reader.GetString(0);
-
-                        Console.WriteLine($"Test ourput {test}!");
+                        Console.WriteLine($"Test output: {test}!");
                     }
                 }
-                connection.Close();
             }
         }
 
-        public void AddFoodItem(String foodname, Double foodcost, String description, Image image)
+        public void AddFoodItem(string foodname, double foodcost, string description, byte[] imageBytes)
         {
-
-            byte[] imageBytes = (image); // Assume this converts ImageSource to byte array
-
-
-            using (var connection = new SqliteConnection(DataBaseName))
+            try
             {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText =
-                @"
-                    INSERT INTO food (name, cost, description, photo)
-                    VALUES ($name, $cost, $description, $photo)
-                ";
-                command.Parameters.AddWithValue("$name", foodname);
-                command.Parameters.AddWithValue("$cost", foodcost);
-                command.Parameters.AddWithValue("$description", description);
-                command.Parameters.AddWithValue("$photo", image);
-                
-                command.ExecuteNonQuery();
-                connection.Close();
+                using (var connection = new SqliteConnection(_databaseName))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText =
+                    @"
+                INSERT INTO food (name, cost, description, photo)
+                VALUES ($name, $cost, $description, $photo)
+            ";
+                    command.Parameters.AddWithValue("$name", foodname);
+                    command.Parameters.AddWithValue("$cost", foodcost);
+                    command.Parameters.AddWithValue("$description", description);
+                    command.Parameters.AddWithValue("$photo", imageBytes);
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception or log it for debugging
+                Console.WriteLine("Error occurred while adding food item: " + ex.Message);
             }
         }
+
+
         public void RemoveFoodItem(String foodname)
         {
 
@@ -133,16 +124,31 @@ namespace RestaurantManager.Components
 
         }
         //AI assisted code below
-        public byte[] ConvertImageToByteArray(Image image)
+        public byte[] ConvertImageToByteArray(Microsoft.Maui.Controls.Image image)
         {
-            if (image == null)
+            if (image == null || image.Source == null)
                 return null;
 
-            using (MemoryStream ms = new MemoryStream())
+            // Convert ImageSource to SixLabors.ImageSharp.Image
+            SixLabors.ImageSharp.Image<Rgba32> sharpImage = null;
+
+            // Assuming you're using a file-based ImageSource (e.g., FileImageSource)
+            if (image.Source is FileImageSource fileImageSource)
             {
-                // Save the image to the MemoryStream in a specific format
-                image.Save(ms, ImageFormat.Png); // You can change the format as needed (JPEG, BMP, etc.)
-                return ms.ToArray();
+                // Load the image from file
+                sharpImage = (Image<Rgba32>?)SixLabors.ImageSharp.Image.Load(fileImageSource.File);
+            }
+            // You may need to handle other types of ImageSource here (e.g., StreamImageSource)
+
+            if (sharpImage == null)
+                return null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                // Save SixLabors.ImageSharp.Image to MemoryStream as PNG
+                sharpImage.Save(stream, new PngEncoder());
+                return stream.ToArray();
             }
         }
+    }
 }
