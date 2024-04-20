@@ -13,7 +13,7 @@ namespace RestaurantManager
 
             MainPage = new MainPage();
 
-            Database database = new Database();
+            Database database = new Database("test1");
 
             database.CreateDB("test4");
             database.AddFoodItem("test4","Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
