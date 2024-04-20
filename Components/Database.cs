@@ -48,7 +48,7 @@ namespace RestaurantManager.Components
                         name TEXT NOT NULL,
                         cost REAL NOT NULL,
                         description TEXT NOT NULL,
-                        photo BLOB NOT NULL
+                        photo BLOB
                     );
 
                     CREATE TABLE IF NOT EXISTS foodorder(
@@ -133,8 +133,21 @@ namespace RestaurantManager.Components
                         double price = Double.Parse(reader.GetString(2));
                         var description = reader.GetString(3);
 
-                        byte[] imageBytes = (System.Byte[])reader[4];
-                        var foodImage = ByteToImage(imageBytes);
+                        String imagePath = AppDomain.CurrentDomain.BaseDirectory;
+                        String actualPath = imagePath.Split("bin", StringSplitOptions.None)[0] + "Components/images/" + "Sushi.png";
+                        System.Drawing.Image image = System.Drawing.Image.FromFile(actualPath);
+                        var foodImage = image;
+
+                        try
+                        {
+                            byte[] imageBytes = (System.Byte[])reader[4];
+                            foodImage = ByteToImage(imageBytes);
+                        }
+                        catch(System.InvalidCastException ex)
+                        {
+
+                        }
+                        
 
                         Returnlist.Add(new FoodItem(id, foodname, price, description, foodImage));
                         Debug.WriteLine($"Food Item info: {id}, {foodname}, {price}, {description}");
@@ -203,13 +216,13 @@ namespace RestaurantManager.Components
 
                 command.CommandText =
                 @"
-                    INSERT INTO food(name, cost, description, photo)
-                    VALUES ($name, $cost, $description, $photo)
+                    INSERT INTO food(name, cost, description)
+                    VALUES ($name, $cost, $description)
                 ";
                 command.Parameters.AddWithValue("$name", foodname);
                 command.Parameters.AddWithValue("$cost", foodcost);
                 command.Parameters.AddWithValue("$description", description);
-                command.Parameters.AddWithValue("$photo", ImageToByte(image, foodname));
+                //command.Parameters.AddWithValue("$photo", ImageToByte(image, foodname));
 
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -225,12 +238,12 @@ namespace RestaurantManager.Components
             {
                 connection.Open();
                 var command = connection.CreateCommand();
-                command.CommandText = "UPDATE food SET name = $name, cost = $cost, description = $description, photo = $photo WHERE id = $id";
+                command.CommandText = "UPDATE food SET name = $name, cost = $cost, description = $description WHERE id = $id";
                 command.Parameters.AddWithValue("$id", id);
                 command.Parameters.AddWithValue("$name", name);
                 command.Parameters.AddWithValue("$cost", cost);
                 command.Parameters.AddWithValue("$description", description);
-                command.Parameters.AddWithValue("$photo", ImageToByte(image, name));
+                //command.Parameters.AddWithValue("$photo", ImageToByte(image, name));
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -369,15 +382,23 @@ namespace RestaurantManager.Components
 
             Debug.WriteLine(actualPath);
 
-            System.Drawing.Image image = System.Drawing.Image.FromFile(actualPath);
-
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-                // Convert Image to byte[]
-                image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                byte[] imageBytes = ms.ToArray();
-                return imageBytes;
+                System.Drawing.Image image = System.Drawing.Image.FromFile(actualPath);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    // Convert Image to byte[]
+                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    byte[] imageBytes = ms.ToArray();
+                    return imageBytes;
+                }
             }
+            catch (System.IO.FileNotFoundException ex) { 
+            
+            }
+
+            return null;
         }
         //turns the bytes back into an image object
         // found this here: https://stackoverflow.com/questions/10853301/save-and-load-image-sqlite-c-sharp

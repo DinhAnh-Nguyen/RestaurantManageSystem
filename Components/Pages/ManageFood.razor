@@ -71,12 +71,13 @@
     private List<FoodItem> foodItems = new List<FoodItem>();
     private List<FoodItem> searchFoodItems = new List<FoodItem>();
     private FoodItem editingItem = new FoodItem();
-    private Database db = new Database("food-db2");
+    private Database db = new Database("food-db5");
     private string searchTerm;
     private bool isModalVisible = false;
 
     protected override void OnInitialized()
     {
+        db.CreateDB();
         LoadFoodItems();
     }
 
