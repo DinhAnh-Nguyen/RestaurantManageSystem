@@ -8,11 +8,14 @@ using Microsoft.Maui.Controls;
 using System.Drawing;
 using System.IO;
 using System.Diagnostics;
+using Microsoft.Maui.ApplicationModel.Communication;
 
 namespace RestaurantManager.Components
 {
     internal class Database
     { 
+        //this creates the tables for our database
+        // we have 3 tables: employees, food and foodorders
         public void CreateDB(string databaseName)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -41,7 +44,7 @@ namespace RestaurantManager.Components
                     );
 
                     CREATE TABLE IF NOT EXISTS foodorder(
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        table_number INTEGER NOT NULL,
                         item TEXT NOT NULL
                     );
                 ";
@@ -51,15 +54,16 @@ namespace RestaurantManager.Components
         }
         public void DeleteDB(string databaseName)
         {
-
+            File.Delete(databaseName + ".db");
         }
 
-        public void LoadDBEmployee(string databaseName)
+        //this loads all existing employees into a list of type employee
+        public List<employee> LoadDBEmployee(string databaseName)
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
-            List<Object> Returnlist = new List<Object>();
+            List<employee> Returnlist = new List<employee>();
 
             using (var connection = new SqliteConnection(DataBaseName))
             {
@@ -72,21 +76,30 @@ namespace RestaurantManager.Components
                     SELECT *
                     FROM employees
                 ";
-
+                //getting the values from the employee table to create the employee object
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        var test = reader.GetString(0);
+                        var id = reader.GetString(0);
+                        var firstname = reader.GetString(1);
+                        var lastname = reader.GetString(2);
+                        var email = reader.GetString(3);
+                        var phonenumber = reader.GetString(4);
+                        int age = reader.GetInt32(5);
 
-                        Console.WriteLine($"Test ourput {test}!");
+                        Returnlist.Add(new employee(firstname, lastname, email, phonenumber, age));
                     }
                 }
                 connection.Close();
             }
+            return Returnlist;
         }
-        public void LoadDBFood(string databaseName)
+
+        // this returns a list of FOOD objects from the given database
+        public List<Food> LoadDBFood(string databaseName)
         {
+            List<Food> Returnlist = new List<Food>();
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -102,24 +115,73 @@ namespace RestaurantManager.Components
                     FROM Food
                 ";
 
+                //getting the values from the food table to create the food object
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        var test = reader.GetString(0);
+                        var id = reader.GetString(0);
+                        var foodname = reader.GetString(1);
+                        double price = Double.Parse(reader.GetString(2));
+                        var description = reader.GetString(3);
 
-                        Debug.WriteLine($"Test ourput {test}!");
+                        byte[] imageBytes = (System.Byte[])reader[4];
+                        var foodImage = ByteToImage(imageBytes);
+
+                        Returnlist.Add(new Food(foodname, price, description, foodImage));
+                        Debug.WriteLine($"Food Item info: {id}, {foodname}, {price}, {description}");
                     }
                 }
                 connection.Close();
             }
+            return Returnlist;
         }
 
-        public void LoadDBOrders(string databaseName)
+        //returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
+        public Dictionary<int, List<string>> LoadDBOrders(string databaseName)
         {
+
             String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            Dictionary<int, List<string>> foodorders = new Dictionary<int, List<string>>();
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                @"
+                    SELECT *
+                    FROM foodorder
+                ";
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int tablenum = reader.GetInt32(0);
+                        var item = reader.GetString(1);
+
+                        if (!foodorders.ContainsKey(tablenum)) 
+                        {
+                            foodorders[tablenum] = new List<string>();
+                        }
+
+                        foodorders[tablenum].Add(item);
+ 
+                        Debug.WriteLine($"Order #{tablenum} item {item}");
+                    }
+                }
+                connection.Close();
+            }
+
+            return foodorders;
+
         }
 
+        //add food items to the database with photos
         public void AddFoodItem(String databaseName, String foodname, Double foodcost, String description, String image)
         {
 
@@ -139,49 +201,164 @@ namespace RestaurantManager.Components
                 command.Parameters.AddWithValue("$name", foodname);
                 command.Parameters.AddWithValue("$cost", foodcost);
                 command.Parameters.AddWithValue("$description", description);
-                command.Parameters.AddWithValue("$photo", ConvertImageToByteArray(image, foodname));
+                command.Parameters.AddWithValue("$photo", ImageToByte(image, foodname));
 
                 command.ExecuteNonQuery();
                 connection.Close();
             }
         }
-        public void RemoveFoodItem(String foodname)
+        //remove a fooditem from the table based on the food name
+        public void RemoveFoodItem(String databaseName, String foodname)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                @"
+                    DELETE FROM food
+                    WHERE name = $foodname
+                ";
+                command.Parameters.AddWithValue("$name", foodname);
+
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        //adds employees to the table
+        public void AddEmployee(String databaseName, String firstname, String lastname, String email, String phonenumber, int age)
         {
 
-        }
-        public void AddEmployee(String firstname, String lastname, String email, String phonenumber, int age)
-        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
 
-        }
-        public void RemoveEmployee(String firstname, String lastname)
-        {
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
 
-        }
-        public void CreateOrder(List<String> items, DateTime timeplaced)
-        {
+                var command = connection.CreateCommand();
 
-        }
-        public void CancelOrder(int orderid)
-        {
+                command.CommandText =
+                @"
+                    INSERT INTO employee(first_name, last_name, email, phone_number, age)
+                    VALUES ($firstname, $lastname, $email, $phonenumber, $age)
+                ";
+                command.Parameters.AddWithValue("$first_name", firstname);
+                command.Parameters.AddWithValue("$last_name", lastname);
+                command.Parameters.AddWithValue("$email", email);
+                command.Parameters.AddWithValue("$phonenumber", phonenumber);
+                command.Parameters.AddWithValue("$age", age);
 
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
         }
-        //AI assisted code below
-        public byte[] ConvertImageToByteArray(String imageName, String fileName)
+        //removes the employee from the table based on their first and last name
+        public void RemoveEmployee(String databaseName, String firstname, String lastname)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                @"
+                    DELETE FROM employee
+                    WHERE first_name = $firstname AND last_name = $lastname
+                ";
+                command.Parameters.AddWithValue("$first_name", firstname);
+                command.Parameters.AddWithValue("$last_name", lastname);
+
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        //add a food order to the database
+        public void CreateOrder(String databaseName, List<String> items, int table)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                foreach (String item in items)
+                {
+
+                    var command = connection.CreateCommand();
+
+                    command.CommandText =
+                    @"
+                    INSERT INTO foodorder(table_number, item)
+                    VALUES ($tablenumber, $item)
+                    ";
+                    command.Parameters.AddWithValue("$item", item);
+                    command.Parameters.AddWithValue("$tablenumber", table);
+
+                    command.ExecuteNonQuery();
+
+                }
+                connection.Close();
+            }
+        }
+        //removes a food order from the database, based on the table id
+        public void CancelOrder(String databaseName, int table)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText =
+                @"
+                    DELETE FROM foodorder
+                    WHERE table_number = $table
+                ";
+                command.Parameters.AddWithValue("$table", table);
+
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
+        //turns images to bytes to be able to store in the database
+        // found this here: https://stackoverflow.com/questions/10853301/save-and-load-image-sqlite-c-sharp
+        public byte[] ImageToByte(String imageName, String fileName)
         {
 
             String imagePath = AppDomain.CurrentDomain.BaseDirectory;
             String actualPath = imagePath.Split("bin", StringSplitOptions.None)[0] + "Components/images/" + imageName;
 
-            Console.WriteLine(actualPath);
+            Debug.WriteLine(actualPath);
 
-            using (Stream imageStream = File.OpenRead(actualPath))
+            System.Drawing.Image image = System.Drawing.Image.FromFile(actualPath);
+
+            using (MemoryStream ms = new MemoryStream())
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    imageStream.CopyToAsync(ms);
-                    return ms.ToArray();
-                }
+                // Convert Image to byte[]
+                image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                byte[] imageBytes = ms.ToArray();
+                return imageBytes;
             }
+        }
+        //turns the bytes back into an image object
+        // found this here: https://stackoverflow.com/questions/10853301/save-and-load-image-sqlite-c-sharp
+        public System.Drawing.Image ByteToImage(byte[] imageBytes)
+        {
+            // Convert byte[] to Image
+            MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length);
+            ms.Write(imageBytes, 0, imageBytes.Length);
+            System.Drawing.Image image = new Bitmap(ms);
+            return image;
         }
     }
 }

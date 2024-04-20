@@ -15,9 +15,12 @@ namespace RestaurantManager
 
             Database database = new Database();
 
-            database.CreateDB("test1");
-            database.AddFoodItem("test1","Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
-            database.LoadDBFood("test1");
+            database.CreateDB("test4");
+            database.AddFoodItem("test4","Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
+            database.AddFoodItem("test4", "Sushi2", 23.59, "Delicious platter of sushi", "Sushi.png");
+            database.LoadDBFood("test4");
+            database.CreateOrder("test4", new List<string> {"sushi", "sushi2", "sushi"}, 50);
+            database.LoadDBOrders("test4");
         }
     }
 }
