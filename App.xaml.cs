@@ -13,11 +13,11 @@ namespace RestaurantManager
 
             MainPage = new MainPage();
 
-            Database database = new Database();
+            Database database = new Database("test1");
 
-            database.CreateDB("test1");
-            database.AddFoodItem("test1","Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
-            database.LoadDBFood("test1");
+            // database.AddFoodItem("Sushi", 23.59, "Delicious platter of sushi", "Sushi.png" as Byte[]);
+            // database.RemoveFoodItem("Sushi");
+            database.LoadDBFood();
         }
     }
 }
