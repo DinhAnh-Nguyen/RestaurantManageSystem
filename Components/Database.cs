@@ -13,10 +13,18 @@ using Microsoft.Maui.ApplicationModel.Communication;
 namespace RestaurantManager.Components
 {
     internal class Database
-    { 
+    {
+
+        String databaseName;
+
+        public Database(String dbName)
+        {
+            databaseName = dbName;
+        }
+
         //this creates the tables for our database
         // we have 3 tables: employees, food and foodorders
-        public void CreateDB(string databaseName)
+        public void CreateDB()
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
             using (var connection = new SqliteConnection(DataBaseName))
@@ -52,13 +60,13 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-        public void DeleteDB(string databaseName)
+        public void DeleteDB()
         {
             File.Delete(databaseName + ".db");
         }
 
         //this loads all existing employees into a list of type employee
-        public List<employee> LoadDBEmployee(string databaseName)
+        public List<employee> LoadDBEmployee()
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -97,7 +105,7 @@ namespace RestaurantManager.Components
         }
 
         // this returns a list of FOOD objects from the given database
-        public List<Food> LoadDBFood(string databaseName)
+        public List<Food> LoadDBFood()
         {
             List<Food> Returnlist = new List<Food>();
 
@@ -138,7 +146,7 @@ namespace RestaurantManager.Components
         }
 
         //returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
-        public Dictionary<int, List<string>> LoadDBOrders(string databaseName)
+        public Dictionary<int, List<string>> LoadDBOrders()
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -182,7 +190,7 @@ namespace RestaurantManager.Components
         }
 
         //add food items to the database with photos
-        public void AddFoodItem(String databaseName, String foodname, Double foodcost, String description, String image)
+        public void AddFoodItem(String foodname, Double foodcost, String description, String image)
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -208,7 +216,7 @@ namespace RestaurantManager.Components
             }
         }
         //remove a fooditem from the table based on the food name
-        public void RemoveFoodItem(String databaseName, String foodname)
+        public void RemoveFoodItem(String foodname)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -230,7 +238,7 @@ namespace RestaurantManager.Components
             }
         }
         //adds employees to the table
-        public void AddEmployee(String databaseName, String firstname, String lastname, String email, String phonenumber, int age)
+        public void AddEmployee(String firstname, String lastname, String email, String phonenumber, int age)
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -257,7 +265,7 @@ namespace RestaurantManager.Components
             }
         }
         //removes the employee from the table based on their first and last name
-        public void RemoveEmployee(String databaseName, String firstname, String lastname)
+        public void RemoveEmployee(String firstname, String lastname)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -280,7 +288,7 @@ namespace RestaurantManager.Components
             }
         }
         //add a food order to the database
-        public void CreateOrder(String databaseName, List<String> items, int table)
+        public void CreateOrder(List<String> items, int table)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -308,7 +316,7 @@ namespace RestaurantManager.Components
             }
         }
         //removes a food order from the database, based on the table id
-        public void CancelOrder(String databaseName, int table)
+        public void CancelOrder(int table)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
