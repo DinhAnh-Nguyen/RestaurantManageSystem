@@ -1,44 +1,138 @@
 ﻿@page "/managefood"
 
+@inject IJSRuntime JSRuntime
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="topbar">
-    <div class="search-container">
-        <form action="">
-            <input type="text" placeholder="Search food item..." name="search">
-            <button type="submit"><i class="fa fa-search"></i></button>
-        </form>
+ <div class="search-container">
+        <input type="text" placeholder="Search food item..." @bind="searchTerm" @oninput="UpdateFilteredItems">
     </div>
-    <div class="add-item">
-        <button>Add Item</button>
-    </div>
-    <div>
-        <p>Test</p>
-    </div>
+    <button @onclick="() => ShowModal(new FoodItem())">Add New Item</button>
 </div>
 
+<div class="body-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Food Item</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var food in searchFoodItems)
+            {
+                <tr>
+                    <td>@food.Name</td>
+                    <td>@food.Cost.ToString("C")</td>
+                    <td>@food.Description</td>
+                    <td>
+                        <button @onclick="() => ShowModal(food)">Update</button>
+                        <button @onclick="() => DeleteItem(food.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (isModalVisible)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <span @onclick="CloseModal" class="close">&times;</span>
+            <EditForm Model="editingItem" OnValidSubmit="HandleValidSubmit">
+                <label>Name:</label>
+                <InputText @bind-Value="editingItem.Name" />
+                <label>Price:</label>
+                <InputNumber @bind-Value="editingItem.Cost" />
+                <label>Description:</label>
+                <InputTextArea @bind-Value="editingItem.Description" />
+                <button type="submit">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
 <style>
-    .topbar {
-        display: flex;
-    }
-
-    .search-container {
-        flex: 4;
-    }
-
-    .search-container input {
-        width: 450px;
-    }
-
-    .add-item {
-        flex: 1;
-    }
-
-    .add-item button {
-		width: 150px;
-    }
+    .modal { display: block; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    .topbar { display: flex; justify-content: space-between; padding: 10px; }
+    .search-container input, .add-form input { width: 200px; margin-right: 10px; }
+    table { width: 100%; }
+    input[type="text"], input[type="number"], textarea { width: 100%; }
 </style>
 
 @code {
+    private List<FoodItem> foodItems = new List<FoodItem>();
+    private List<FoodItem> searchFoodItems = new List<FoodItem>();
+    private FoodItem editingItem = new FoodItem();
+    private Database db = new Database("food-db2");
+    private string searchTerm;
+    private bool isModalVisible = false;
 
+    protected override void OnInitialized()
+    {
+        LoadFoodItems();
+    }
+
+    private void LoadFoodItems()
+    {
+        foodItems = db.LoadDBFood(); // Load from database or service
+        searchFoodItems = foodItems;
+    }
+
+    private void ShowModal(FoodItem food)
+    {
+        editingItem = food;
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    private void HandleValidSubmit()
+    {
+        if (editingItem.Id == 0) // New item
+            db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
+        else // Existing item
+            db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
+
+        //LoadFoodItems();
+        UpdateFilteredItems();
+        CloseModal();
+    }
+
+    private void UpdateFilteredItems()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchFoodItems = foodItems.ToList(); 
+        }
+        else
+        {
+            // Lowercase comparison for case-insensitive searching
+            searchFoodItems = foodItems.Where(item => 
+                item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                item.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private void DeleteItem(int id)
+    {
+        db.RemoveFoodItem(id);
+         UpdateFilteredItems();
+        //LoadFoodItems();
+    }
+
+    private void SearchFood()
+    {
+        
+    }
 }

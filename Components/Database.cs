@@ -22,7 +22,7 @@ namespace RestaurantManager.Components
             databaseName = dbName;
         }
 
-        //this creates the tables for our database
+        // this creates the tables for our database
         // we have 3 tables: employees, food and foodorders
         public void CreateDB()
         {
@@ -65,7 +65,7 @@ namespace RestaurantManager.Components
             File.Delete(databaseName + ".db");
         }
 
-        //this loads all existing employees into a list of type employee
+        // this loads all existing employees into a list of type employee
         public List<employee> LoadDBEmployee()
         {
 
@@ -84,7 +84,7 @@ namespace RestaurantManager.Components
                     SELECT *
                     FROM employees
                 ";
-                //getting the values from the employee table to create the employee object
+                // getting the values from the employee table to create the employee object
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -105,9 +105,9 @@ namespace RestaurantManager.Components
         }
 
         // this returns a list of FOOD objects from the given database
-        public List<Food> LoadDBFood()
+        public List<FoodItem> LoadDBFood()
         {
-            List<Food> Returnlist = new List<Food>();
+            List<FoodItem> Returnlist = new List<FoodItem>();
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -123,12 +123,12 @@ namespace RestaurantManager.Components
                     FROM Food
                 ";
 
-                //getting the values from the food table to create the food object
+                // getting the values from the food table to create the food object
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        var id = reader.GetString(0);
+                        var id = reader.GetInt32(0);
                         var foodname = reader.GetString(1);
                         double price = Double.Parse(reader.GetString(2));
                         var description = reader.GetString(3);
@@ -136,7 +136,7 @@ namespace RestaurantManager.Components
                         byte[] imageBytes = (System.Byte[])reader[4];
                         var foodImage = ByteToImage(imageBytes);
 
-                        Returnlist.Add(new Food(foodname, price, description, foodImage));
+                        Returnlist.Add(new FoodItem(id, foodname, price, description, foodImage));
                         Debug.WriteLine($"Food Item info: {id}, {foodname}, {price}, {description}");
                     }
                 }
@@ -145,7 +145,7 @@ namespace RestaurantManager.Components
             return Returnlist;
         }
 
-        //returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
+        // returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
         public Dictionary<int, List<string>> LoadDBOrders()
         {
 
@@ -189,7 +189,7 @@ namespace RestaurantManager.Components
 
         }
 
-        //add food items to the database with photos
+        // add food items to the database with photos
         public void AddFoodItem(String foodname, Double foodcost, String description, String image)
         {
 
@@ -215,8 +215,29 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-        //remove a fooditem from the table based on the food name
-        public void RemoveFoodItem(String foodname)
+
+        public void ModifyFoodItem(int id, string name, double cost, string description, String image)
+        {
+
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "UPDATE food SET name = $name, cost = $cost, description = $description, photo = $photo WHERE id = $id";
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$name", name);
+                command.Parameters.AddWithValue("$cost", cost);
+                command.Parameters.AddWithValue("$description", description);
+                command.Parameters.AddWithValue("$photo", ImageToByte(image, name));
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
+        // remove a fooditem from the table based on the food name
+        public void RemoveFoodItem(int id)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -229,15 +250,15 @@ namespace RestaurantManager.Components
                 command.CommandText =
                 @"
                     DELETE FROM food
-                    WHERE name = $foodname
+                    WHERE id = $id
                 ";
-                command.Parameters.AddWithValue("$name", foodname);
+                command.Parameters.AddWithValue("$id", id);
 
                 command.ExecuteNonQuery();
                 connection.Close();
             }
         }
-        //adds employees to the table
+        // adds employees to the table
         public void AddEmployee(String firstname, String lastname, String email, String phonenumber, int age)
         {
 
@@ -264,7 +285,7 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-        //removes the employee from the table based on their first and last name
+        // removes the employee from the table based on their first and last name
         public void RemoveEmployee(String firstname, String lastname)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -287,7 +308,7 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-        //add a food order to the database
+        // add a food order to the database
         public void CreateOrder(List<String> items, int table)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -315,7 +336,7 @@ namespace RestaurantManager.Components
                 connection.Close();
             }
         }
-        //removes a food order from the database, based on the table id
+        // removes a food order from the database, based on the table id
         public void CancelOrder(int table)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
