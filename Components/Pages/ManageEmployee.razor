@@ -2,10 +2,181 @@
 
 <h3>ManageEmployee</h3>
 
-<style>
+@inject IJSRuntime JSRuntime
 
-</style>
+
+<div class="topbar">
+    <input type="text" placeholder="Search employees..." @bind="searchTerm" @oninput="UpdateFilteredEmployees">
+    <button><i class="fa fa-search"></i></button>
+    <button @onclick="() => ShowEmployeeModal(new Employee())">Add New Employee</button>
+</div>
+
+<div class="body-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in searchEmployees)
+            {
+                <tr>
+                    <td>@employee.EmployeeId</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.Position</td>
+                    <td>
+                        <button class="update" @onclick="() => ShowEmployeeModal(employee)">Update</button>
+                        <button class="delete" @onclick="() => DeleteEmployee(employee.EmployeeId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (isEmployeeModalVisible)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <span @onclick="CloseEmployeeModal" class="close">&times;</span>
+            <EditForm Model="editingEmployee" class="form" OnValidSubmit="HandleEmployeeValidSubmit">
+                <div class="item1">
+                    <label style="white-space: pre;">Name: <InputText class="input-text" @bind-Value="editingEmployee.FirstName" /></label>
+                </div>
+                <div class="item2">
+                    <label style="white-space: pre;">Position: <InputText class="input-text" @bind-Value="editingEmployee.Position" /></label>
+                </div>
+                <button type="submit">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
 
 @code {
+    private List<Employee> employees = new List<Employee>();
+    private List<Employee> searchEmployees = new List<Employee>();
+    private Employee editingEmployee = new Employee();
+    private Database db = new Database("employees-db");
+    private string searchTerm;
+    private bool isEmployeeModalVisible = false;
 
+    protected override void OnInitialized()
+    {
+        db.CreateDB();
+        LoadEmployees();
+    }
+
+    private void LoadEmployees()
+    {
+        employees = db.LoadDBEmployee(); // Load from database or service
+        searchEmployees = employees;
+    }
+
+    private void ShowEmployeeModal(Employee employee)
+    {
+        editingEmployee = employee;
+        isEmployeeModalVisible = true;
+    }
+
+    private void CloseEmployeeModal()
+    {
+        isEmployeeModalVisible = false;
+    }
+
+    private void HandleEmployeeValidSubmit()
+    {
+        if (editingEmployee.EmployeeId == 0) // New employee
+            db.AddEmployee(editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+        else // Existing employee
+            db.ModifyEmployee(editingEmployee.EmployeeId, editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+
+        LoadEmployees();
+        CloseEmployeeModal();
+    }
+
+    private void UpdateFilteredEmployees()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchEmployees = employees.ToList();
+        }
+        else
+        {
+            // Lowercase comparison for case-insensitive searching
+            searchEmployees = employees.Where(employee =>
+                employee.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                employee.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private void DeleteEmployee(int employeeId)
+    {
+        db.RemoveEmployee(employeeId);
+        LoadEmployees();
+    }
 }
+
+<style>
+    /* Styles for item info window */
+    .modal { 
+        display: flex;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 25px;
+    }
+
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .form {
+        grid-template-columns: auto auto;
+        gap: 10px;
+    }
+
+    .item1, .item2 {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .input-text, .input-number {
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    } 
+    
+    .item label {
+        margin-bottom: 5px;
+    }
+
+    .form button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        background: linear-gr
+</style>

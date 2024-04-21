@@ -6,21 +6,29 @@ using System.Threading.Tasks;
 
 namespace RestaurantManager.Components
 {
-    internal class employee
+    internal class Employee
     {
-        String FirstName;
-        String Lastname;
-        String Email;
-        String Phone;
-        int Age;
+        public int EmployeeId { get; set; }
+        public String FirstName { get; set; }
+        public String LastName { get; set; }
+        public String Email { get; set; }
+        public String Phone { get; set; }
+        public int Age { get; set; }
+        public String Position { get; set; }
 
-        public employee(String firstname, String lastname, String email, String phone, int age)
+        public Employee(String firstname, String lastname, String email, String phone, int age, String position)
         {
             FirstName = firstname;
-            Lastname = lastname;
+            LastName = lastname;
             Email = email;
             Phone = phone;
             Age = age;
+            Position = position;
+        }
+
+        public Employee()
+        {
+
         }
     }
 }

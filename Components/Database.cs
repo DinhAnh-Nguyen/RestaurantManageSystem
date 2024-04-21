@@ -40,7 +40,8 @@ namespace RestaurantManager.Components
                         last_name TEXT NOT NULL,
                         email TEXT NOT NULL,
                         phone_number TEXT NOT NULL,
-                        age INTEGER NOT NULL
+                        age INTEGER NOT NULL,
+                        position TEXT NOT NULL
                     );
 
                     CREATE TABLE IF NOT EXISTS food(
@@ -66,12 +67,12 @@ namespace RestaurantManager.Components
         }
 
         // this loads all existing employees into a list of type employee
-        public List<employee> LoadDBEmployee()
+        public List<Employee> LoadDBEmployee()
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
-            List<employee> Returnlist = new List<employee>();
+            List<Employee> Returnlist = new List<Employee>();
 
             using (var connection = new SqliteConnection(DataBaseName))
             {
@@ -95,8 +96,9 @@ namespace RestaurantManager.Components
                         var email = reader.GetString(3);
                         var phonenumber = reader.GetString(4);
                         int age = reader.GetInt32(5);
+                        var position = reader.GetString(6);
 
-                        Returnlist.Add(new employee(firstname, lastname, email, phonenumber, age));
+                        Returnlist.Add(new Employee(firstname, lastname, email, phonenumber, age, position));
                     }
                 }
                 connection.Close();
@@ -231,7 +233,6 @@ namespace RestaurantManager.Components
 
         public void ModifyFoodItem(int id, string name, double cost, string description, String image)
         {
-
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
             using (var connection = new SqliteConnection(DataBaseName))
@@ -272,7 +273,7 @@ namespace RestaurantManager.Components
             }
         }
         // adds employees to the table
-        public void AddEmployee(String firstname, String lastname, String email, String phonenumber, int age)
+        public void AddEmployee(String firstname, String lastname, String email, String phonenumber, int age, String position)
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
@@ -285,21 +286,43 @@ namespace RestaurantManager.Components
 
                 command.CommandText =
                 @"
-                    INSERT INTO employee(first_name, last_name, email, phone_number, age)
-                    VALUES ($firstname, $lastname, $email, $phonenumber, $age)
+                    INSERT INTO employee(first_name, last_name, email, phone_number, age, position)
+                    VALUES ($firstname, $lastname, $email, $phonenumber, $age, $position)
                 ";
                 command.Parameters.AddWithValue("$first_name", firstname);
                 command.Parameters.AddWithValue("$last_name", lastname);
                 command.Parameters.AddWithValue("$email", email);
                 command.Parameters.AddWithValue("$phonenumber", phonenumber);
                 command.Parameters.AddWithValue("$age", age);
+                command.Parameters.AddWithValue("$position", position);
 
                 command.ExecuteNonQuery();
                 connection.Close();
             }
         }
+        public void ModifyEmployee(int id, String firstname, String lastname, String email, String phone, int age, String position)
+        {
+            String DataBaseName = "Data Source=" + databaseName + ".db";
+
+            using (var connection = new SqliteConnection(DataBaseName))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "UPDATE employee SET first_name = $firstname, last_name = $lastname, email = $email, phone_number = $phone, age = $age, position = $position WHERE id = $id";
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$firstname", firstname);
+                command.Parameters.AddWithValue("$lastname", lastname);
+                command.Parameters.AddWithValue("$email", email);
+                command.Parameters.AddWithValue("$phone", phone);
+                command.Parameters.AddWithValue("$age", age);
+                command.Parameters.AddWithValue("$position", position);
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
         // removes the employee from the table based on their first and last name
-        public void RemoveEmployee(String firstname, String lastname)
+        public void RemoveEmployee(int id)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -312,10 +335,9 @@ namespace RestaurantManager.Components
                 command.CommandText =
                 @"
                     DELETE FROM employee
-                    WHERE first_name = $firstname AND last_name = $lastname
+                    WHERE id = $id
                 ";
-                command.Parameters.AddWithValue("$first_name", firstname);
-                command.Parameters.AddWithValue("$last_name", lastname);
+                command.Parameters.AddWithValue("$id", id);
 
                 command.ExecuteNonQuery();
                 connection.Close();

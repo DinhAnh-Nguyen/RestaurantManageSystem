@@ -2,10 +2,211 @@
 
 <h3>ManageOrder</h3>
 
-<style>
+@inject IJSRuntime JSRuntime
 
-</style>
+
+<div class="topbar">
+    <input type="text" placeholder="Search orders..." @bind="searchTerm">
+    <button><i class="fa fa-search"></i></button>
+    <button @onclick="() => ShowOrderModal(new Order())">Add New Order</button>
+</div>
+
+<div class="body-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in searchOrders)
+            {
+                <tr>
+                    <td></td>
+                    <td></td>
+                    
+                    <td>
+                        
+                        
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
+    private Dictionary<int, List<string>> orders;
+    private Dictionary<int, List<string>> searchOrders;
+    private Order editingOrder = new Order();
+    private Database db = new Database("orders-db");
+    private string searchTerm;
+    private bool isOrderModalVisible = false;
 
+    protected override void OnInitialized()
+    {
+        db.CreateDB();
+        LoadOrders();
+    }
+
+    private void LoadOrders()
+    {
+        orders = db.LoadDBOrders(); // Load from database or service
+        searchOrders = orders;
+    }
+
+    private void ShowOrderModal(Order order)
+    {
+        editingOrder = order;
+        isOrderModalVisible = true;
+    }
+
+    private void CloseOrderModal()
+    {
+        isOrderModalVisible = false;
+    }
+
+    private void HandleOrderValidSubmit()
+    {
+        if (editingOrder.OrderID == 0) // New order
+            db.CreateOrder(new List<string> {"food items, more food items"}, editingOrder.OrderID);
+        //else // Existing order
+            //db.ModifyOrder(editingOrder.OrderId, editingOrder.CustomerName, editingOrder.TotalPrice);
+
+        LoadOrders();
+        CloseOrderModal();
+    }
+    /*
+    private void UpdateFilteredOrders()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchOrders = orders.ToList();
+        }
+        else
+        {
+            // Lowercase comparison for case-insensitive searching
+            searchOrders = orders.Where(order =>
+                order.CustomerName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+    */
+
+    private void DeleteOrder(int orderId)
+    {
+        db.CancelOrder(orderId);
+        LoadOrders();
+    }
 }
+
+<style>
+    /* Styles for item info window */
+    .modal {
+        display: flex;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 25px;
+    }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .form {
+        grid-template-columns: auto auto;
+        gap: 10px;
+    }
+
+    .item1, .item2 {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .input-text, .input-number {
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .item label {
+        margin-bottom: 5px;
+    }
+
+    .form button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 600px;
+    }
+
+    .update, .delete {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 25px;
+    }
+
+    table {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .topbar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+        .topbar input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .topbar button {
+            padding: 5px 10px;
+            background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+</style>
