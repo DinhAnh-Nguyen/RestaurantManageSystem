@@ -5,10 +5,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="topbar">
- <div class="search-container">
         <input type="text" placeholder="Search food item..." @bind="searchTerm" @oninput="UpdateFilteredItems">
-    </div>
-    <button @onclick="() => ShowModal(new FoodItem())">Add New Item</button>
+        <button><i class="fa fa-search"></i></button>
+        <button @onclick="() => ShowModal(new FoodItem())">Add New Item</button>
 </div>
 
 <div class="body-container">
@@ -29,8 +28,8 @@
                     <td>@food.Cost.ToString("C")</td>
                     <td>@food.Description</td>
                     <td>
-                        <button @onclick="() => ShowModal(food)">Update</button>
-                        <button @onclick="() => DeleteItem(food.Id)">Delete</button>
+                        <button class="update" @onclick="() => ShowModal(food)">Update</button>
+                        <button class="delete" @onclick="() => DeleteItem(food.Id)">Delete</button>
                     </td>
                 </tr>
             }
@@ -43,28 +42,137 @@
     <div class="modal">
         <div class="modal-content">
             <span @onclick="CloseModal" class="close">&times;</span>
-            <EditForm Model="editingItem" OnValidSubmit="HandleValidSubmit">
-                <label>Name:</label>
-                <InputText @bind-Value="editingItem.Name" />
-                <label>Price:</label>
-                <InputNumber @bind-Value="editingItem.Cost" />
-                <label>Description:</label>
-                <InputTextArea @bind-Value="editingItem.Description" />
+            <EditForm Model="editingItem" class="form" OnValidSubmit="HandleValidSubmit">
+                <div class="item1">
+                    <label style="white-space: pre;">Name:           <InputText class="input-text" @bind-Value="editingItem.Name" /></label>
+                </div>
+                <div class="item2">
+                    <label style="white-space: pre;">Price:            <InputNumber class="input-number" @bind-Value="editingItem.Cost" /></label>
+                </div>
+                <div class="item3">
+                    <label style="white-space: pre;">Description:  <InputText class="input-text" @bind-Value="editingItem.Description" /></label>
+                    
+                </div>
                 <button type="submit">Save</button>
             </EditForm>
+
         </div>
     </div>
 }
 
 <style>
-    .modal { display: block; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); }
-    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
-    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    /* Styles for item info window */
+    .modal { 
+        display: flex;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 25px;
+    }
+
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .form {
+        grid-template-columns: auto auto;
+        gap: 10px;
+    }
+
+    .item1, .item2, .item3 {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .input-text, .input-number {
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    } 
+    
+    .item label {
+        margin-bottom: 5px;
+    }
+
+    .form button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 600px;
+    }
+
+    .update, .delete {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 25px;
+    }
+
+    /* Styles for top-bar
     .topbar { display: flex; justify-content: space-between; padding: 10px; }
     .search-container input, .add-form input { width: 200px; margin-right: 10px; }
-    table { width: 100%; }
-    input[type="text"], input[type="number"], textarea { width: 100%; }
+    .search-container button { padding: 5px 10px; background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97)); color: white; border: none; border-radius: 5px; cursor: pointer; }
+    input[type="text"], input[type="number"], textarea { width: 100%; } */
+
+    table {
+        margin-top: 20px; 
+        width: 100%;
+    }
+
+    .topbar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .topbar input[type="text"] {
+        flex-grow: 1;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .topbar button {
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 </style>
 
 @code {
