@@ -17,6 +17,8 @@ namespace RestaurantManager.Components
 
         String databaseName;
 
+        public bool IsInfoCovered { get; set; }
+
         public Database(String dbName)
         {
             databaseName = dbName;
@@ -209,25 +211,33 @@ namespace RestaurantManager.Components
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
+            IsInfoCovered = false;
 
-            using (var connection = new SqliteConnection(DataBaseName))
+            try
             {
-                connection.Open();
+                using (var connection = new SqliteConnection(DataBaseName))
+                {
+                    connection.Open();
 
-                var command = connection.CreateCommand();
+                    var command = connection.CreateCommand();
 
-                command.CommandText =
-                @"
+                    command.CommandText =
+                    @"
                     INSERT INTO food(name, cost, description)
                     VALUES ($name, $cost, $description)
-                ";
-                command.Parameters.AddWithValue("$name", foodname);
-                command.Parameters.AddWithValue("$cost", foodcost);
-                command.Parameters.AddWithValue("$description", description);
-                //command.Parameters.AddWithValue("$photo", ImageToByte(image, foodname));
+                    ";
+                    command.Parameters.AddWithValue("$name", foodname);
+                    command.Parameters.AddWithValue("$cost", foodcost);
+                    command.Parameters.AddWithValue("$description", description);
+                    //command.Parameters.AddWithValue("$photo", ImageToByte(image, foodname));
 
-                command.ExecuteNonQuery();
-                connection.Close();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                IsInfoCovered = true;
             }
         }
 

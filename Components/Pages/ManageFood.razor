@@ -43,6 +43,9 @@
         <div class="modal-content">
             <span @onclick="CloseModal" class="close">&times;</span>
             <EditForm Model="editingItem" class="form" OnValidSubmit="HandleValidSubmit">
+                <div class="error_text">
+                    <label style="white-space: pre;"></label>
+                </div>
                 <div class="item1">
                     <label style="white-space: pre;">Name:           <InputText class="input-text" @bind-Value="editingItem.Name" /></label>
                 </div>
@@ -55,6 +58,10 @@
                 </div>
                 <button type="submit">Save</button>
             </EditForm>
+            @if (db.IsInfoCovered)
+            {
+                <div class="error-handling">You have to fill in all info before you can save.</div>
+            }
 
         </div>
     </div>
@@ -189,6 +196,8 @@
         LoadFoodItems();
     }
 
+
+
     private void LoadFoodItems()
     {
         foodItems = db.LoadDBFood(); // Load from database or service
@@ -208,16 +217,23 @@
 
     private void HandleValidSubmit()
     {
-        if (editingItem.Id == 0) // New item
-            db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
-        else // Existing item
-            db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
+        if (editingItem.Name != null && editingItem.Cost != null && editingItem.Cost != null)
+        {
+            if (editingItem.Id == 0) // New item
+                db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
+            else // Existing item
+                db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
 
-        //LoadFoodItems();
-        UpdateFilteredItems();
-        CloseModal();
+            UpdateFilteredItems();
+            CloseModal();
+        }
+        else
+        {
+            //error_text.Text = "Please enter valid information";
+        }
     }
-
+        //LoadFoodItems();
+        
     private void UpdateFilteredItems()
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
@@ -236,7 +252,7 @@
     private void DeleteItem(int id)
     {
         db.RemoveFoodItem(id);
-         UpdateFilteredItems();
+        UpdateFilteredItems();
         //LoadFoodItems();
     }
 

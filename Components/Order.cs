@@ -10,8 +10,8 @@ namespace RestaurantManager.Components
     {
         public int OrderID { get; set; }
         public List<String> orderitems { get; set; }
-
         public Order() { 
+
         }
     }
 }

@@ -44,10 +44,22 @@
         <div class="modal-content">
             <span @onclick="CloseEmployeeModal" class="close">&times;</span>
             <EditForm Model="editingEmployee" class="form" OnValidSubmit="HandleEmployeeValidSubmit">
-                <div class="item1">
-                    <label style="white-space: pre;">Name: <InputText class="input-text" @bind-Value="editingEmployee.FirstName" /></label>
+                <div class="firstname">
+                    <label style="white-space: pre;">First Name: <InputText class="input-text" @bind-Value="editingEmployee.FirstName" /></label>
                 </div>
-                <div class="item2">
+                <div class="lastname">
+                    <label style="white-space: pre;">Last Name: <InputText class="input-text" @bind-Value="editingEmployee.LastName" /></label>
+                </div>
+                <div class="email">
+                    <label style="white-space: pre;">Email: <InputText class="input-text" @bind-Value="editingEmployee.Email" /></label>
+                </div>
+                <div class="phonenumber">
+                    <label style="white-space: pre;">Phone: <InputText class="input-text" @bind-Value="editingEmployee.Phone" /></label>
+                </div>
+                <div class="age">
+                    <label style="white-space: pre;">Age: <InputNumber class="input-number" @bind-Value="editingEmployee.Age" /></label>
+                </div>
+                <div class="position">
                     <label style="white-space: pre;">Position: <InputText class="input-text" @bind-Value="editingEmployee.Position" /></label>
                 </div>
                 <button type="submit">Save</button>
@@ -122,7 +134,7 @@
 
 <style>
     /* Styles for item info window */
-    .modal { 
+    .modal {
         display: flex;
         background-color: rgba(0,0,0,0.4);
     }
@@ -147,18 +159,18 @@
         margin-right: 25px;
     }
 
-    .close:hover, .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
 
     .form {
         grid-template-columns: auto auto;
         gap: 10px;
     }
 
-    .item1, .item2 {
+    .item1, .item2, .item3 {
         display: flex;
         margin-top: 10px;
         margin-bottom: 5px;
@@ -169,8 +181,8 @@
         padding: 5px;
         border: 1px solid #ccc;
         border-radius: 5px;
-    } 
-    
+    }
+
     .item label {
         margin-bottom: 5px;
     }
@@ -178,5 +190,59 @@
     .form button {
         margin-top: 20px;
         padding: 5px 10px;
-        background: linear-gr
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 600px;
+    }
+
+    .update, .delete {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 25px;
+    }
+
+    /* Styles for top-bar
+        .topbar { display: flex; justify-content: space-between; padding: 10px; }
+        .search-container input, .add-form input { width: 200px; margin-right: 10px; }
+        .search-container button { padding: 5px 10px; background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97)); color: white; border: none; border-radius: 5px; cursor: pointer; }
+        input[type="text"], input[type="number"], textarea { width: 100%; } */
+
+    table {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .topbar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+        .topbar input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .topbar button {
+            padding: 5px 10px;
+            background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 </style>
