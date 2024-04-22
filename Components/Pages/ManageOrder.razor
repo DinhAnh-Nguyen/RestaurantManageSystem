@@ -10,9 +10,8 @@
     <table>
         <thead>
             <tr>
-                <th>Order ID</th>
+                <th>Table Number</th>
                 <th>Customer Name</th>
-                <th>Total Price</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -20,18 +19,38 @@
             @foreach (var order in searchOrders)
             {
                 <tr>
-                    <td></td>
-                    <td></td>
-                    
+                    <td>@order.TableNumber</td>
+                    <td>@order.CustomerName</td>
                     <td>
-                        
-                        
+                        <button class="delete" @onclick="() => DeleteOrder(order.TableNumber)">Delete</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@if (isOrderModalVisible)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <span @onclick="CloseOrderModal" class="close">&times;</span>
+            <EditForm Model="editingOrder" class="form" OnValidSubmit="HandleOrderValidSubmit">
+                <div class="item1">
+                    <label style="white-space: pre;">Table Number:           <InputNumber class="input-number" @bind-Value="editingOrder.TableNumber" /></label>
+                </div>
+                <div class="item2">
+                    <label style="white-space: pre;">Customer Name:       <InputText class="input-text" @bind-Value="editingOrder.CustomerName" /></label>
+                </div>
+                <button type="submit">Save</button>
+            </EditForm>
+            @if (db.IsInfoCovered)
+            {
+                <div class="error-handling">You have to fill in all info before you can save.</div>
+            }
+        </div>
+    </div>
+}
 
 <style>
     /* Styles for item info window */
@@ -60,18 +79,18 @@
         margin-right: 25px;
     }
 
-        .close:hover, .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
     .form {
         grid-template-columns: auto auto;
         gap: 10px;
     }
 
-    .item1, .item2, .item3 {
+    .item1, .item2 {
         display: flex;
         margin-top: 10px;
         margin-bottom: 5px;
@@ -99,7 +118,7 @@
         width: 600px;
     }
 
-    /* Styles for page info*/
+    /* Styles for page info */
     table {
         margin-top: 20px;
         width: 100%;
@@ -142,8 +161,8 @@
 </style>
 
 @code {
-    private Dictionary<int, List<string>> orders;
-    private Dictionary<int, List<string>> searchOrders;
+    private List<Order> orders = new List<Order>();
+    private List<Order> searchOrders = new List<Order>();
     private Order editingOrder = new Order();
     private Database db = new Database("orders-db");
     private string searchTerm;
@@ -174,33 +193,20 @@
 
     private void HandleOrderValidSubmit()
     {
-        if (editingOrder.OrderID == 0) // New order
-            db.CreateOrder(new List<string> {"food items, more food items"}, editingOrder.OrderID);
-        //else // Existing order
-            //db.ModifyOrder(editingOrder.OrderId, editingOrder.CustomerName, editingOrder.TotalPrice);
-
+        if (editingOrder.TableNumber == 0) // New order
+        {
+            db.CreateOrder(editingOrder.TableNumber, editingOrder.CustomerName);
+            if (db.IsInfoCovered == false)
+            {
+                CloseOrderModal();
+            }
+        }
         LoadOrders();
-        CloseOrderModal();
     }
-    /*
-    private void UpdateFilteredOrders()
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchOrders = orders.ToList();
-        }
-        else
-        {
-            // Lowercase comparison for case-insensitive searching
-            searchOrders = orders.Where(order =>
-                order.CustomerName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-    }
-    */
 
-    private void DeleteOrder(int orderId)
+    private void DeleteOrder(int table_number)
     {
-        db.CancelOrder(orderId);
+        db.CancelOrder(table_number);
         LoadOrders();
     }
 }

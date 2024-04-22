@@ -56,7 +56,7 @@ namespace RestaurantManager.Components
 
                     CREATE TABLE IF NOT EXISTS foodorder(
                         table_number INTEGER NOT NULL,
-                        item TEXT NOT NULL
+                        customer_name TEXT NOT NULL
                     );
                 ";
                 command.ExecuteNonQuery();
@@ -163,12 +163,11 @@ namespace RestaurantManager.Components
         }
 
         // returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
-        public Dictionary<int, List<string>> LoadDBOrders()
+        public List<Order> LoadDBOrders()
         {
+            List<Order> Returnlist = new List<Order>();
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
-
-            Dictionary<int, List<string>> foodorders = new Dictionary<int, List<string>>();
 
             using (var connection = new SqliteConnection(DataBaseName))
             {
@@ -186,23 +185,17 @@ namespace RestaurantManager.Components
                 {
                     while (reader.Read())
                     {
-                        int tablenum = reader.GetInt32(0);
-                        var item = reader.GetString(1);
+                        int table_number = reader.GetInt32(0);
+                        var customer_name = reader.GetString(1);
 
-                        if (!foodorders.ContainsKey(tablenum)) 
-                        {
-                            foodorders[tablenum] = new List<string>();
-                        }
-
-                        foodorders[tablenum].Add(item);
- 
-                        Debug.WriteLine($"Order #{tablenum} item {item}");
+                        Returnlist.Add(new Order(table_number, customer_name));
+                        Debug.WriteLine($"Order info: {table_number}, {customer_name}");
                     }
                 }
                 connection.Close();
             }
 
-            return foodorders;
+            return Returnlist;
 
         }
 
@@ -362,35 +355,41 @@ namespace RestaurantManager.Components
             }
         }
         // add a food order to the database
-        public void CreateOrder(List<String> items, int table)
+        public void CreateOrder(int table_number, string customer_name)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
+            IsInfoCovered = false;
 
-            using (var connection = new SqliteConnection(DataBaseName))
+            try
             {
-                connection.Open();
-
-                foreach (String item in items)
+                using (var connection = new SqliteConnection(DataBaseName))
                 {
+                    connection.Open();
 
                     var command = connection.CreateCommand();
 
                     command.CommandText =
                     @"
-                    INSERT INTO foodorder(table_number, item)
-                    VALUES ($tablenumber, $item)
-                    ";
-                    command.Parameters.AddWithValue("$item", item);
-                    command.Parameters.AddWithValue("$tablenumber", table);
+                INSERT INTO foodorder(table_number, customer_name)
+                VALUES ($tablenumber, $customername)
+                ";
+                    command.Parameters.AddWithValue("$tablenumber", table_number);
+                    command.Parameters.AddWithValue("$customername", customer_name);
 
                     command.ExecuteNonQuery();
 
+                    connection.Close();
                 }
-                connection.Close();
             }
+            catch (Exception ex)
+            {
+                IsInfoCovered = true;
+            }
+            
         }
+
         // removes a food order from the database, based on the table id
-        public void CancelOrder(int table)
+        public void CancelOrder(int table_number)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -403,9 +402,9 @@ namespace RestaurantManager.Components
                 command.CommandText =
                 @"
                     DELETE FROM foodorder
-                    WHERE table_number = $table
+                    WHERE table_number = $tablenumber
                 ";
-                command.Parameters.AddWithValue("$table", table);
+                command.Parameters.AddWithValue("$tablenumber", table_number);
 
                 command.ExecuteNonQuery();
                 connection.Close();

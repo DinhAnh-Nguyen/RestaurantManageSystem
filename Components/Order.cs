@@ -8,10 +8,15 @@ namespace RestaurantManager.Components
 {
     internal class Order
     {
-        public int OrderID { get; set; }
-        public List<String> orderitems { get; set; }
-        public Order() { 
+        public int TableNumber { get; set; }
+        public string CustomerName { get; set; }
 
+        public Order(int table_number, string customer_name)
+        { 
+            TableNumber = table_number;
+            CustomerName = customer_name;
         }
+
+        public Order () { }
     }
 }

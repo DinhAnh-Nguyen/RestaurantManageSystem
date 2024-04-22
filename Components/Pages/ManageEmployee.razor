@@ -47,23 +47,23 @@
         <div class="modal-content">
             <span @onclick="CloseEmployeeModal" class="close">&times;</span>
             <EditForm Model="editingEmployee" class="form" OnValidSubmit="HandleEmployeeValidSubmit">
-                <div class="firstname">
+                <div class="item1">
                     <label style="white-space: pre;">First Name: <InputText class="input-text" @bind-Value="editingEmployee.FirstName" /></label>
                 </div>
-                <div class="lastname">
+                <div class="item2">
                     <label style="white-space: pre;">Last Name: <InputText class="input-text" @bind-Value="editingEmployee.LastName" /></label>
                 </div>
-                <div class="email">
-                    <label style="white-space: pre;">Email: <InputText class="input-text" @bind-Value="editingEmployee.Email" /></label>
+                <div class="item3">
+                    <label style="white-space: pre;">Email:         <InputText class="input-text" @bind-Value="editingEmployee.Email" /></label>
                 </div>
-                <div class="phonenumber">
-                    <label style="white-space: pre;">Phone: <InputText class="input-text" @bind-Value="editingEmployee.Phone" /></label>
+                <div class="item4">
+                    <label style="white-space: pre;">Phone:        <InputText class="input-text" @bind-Value="editingEmployee.Phone" /></label>
                 </div>
-                <div class="age">
-                    <label style="white-space: pre;">Age: <InputNumber class="input-number" @bind-Value="editingEmployee.Age" /></label>
+                <div class="item5">
+                    <label style="white-space: pre;">Age:            <InputNumber class="input-number" @bind-Value="editingEmployee.Age" /></label>
                 </div>
-                <div class="position">
-                    <label style="white-space: pre;">Position: <InputText class="input-text" @bind-Value="editingEmployee.Position" /></label>
+                <div class="item6">
+                    <label style="white-space: pre;">Position:      <InputText class="input-text" @bind-Value="editingEmployee.Position" /></label>
                 </div>
                 <button type="submit">Save</button>
             </EditForm>
@@ -113,7 +113,7 @@
         gap: 10px;
     }
 
-    .item1, .item2, .item3 {
+    .item1, .item2, .item3, .item4, .item5, .item6 {
         display: flex;
         margin-top: 10px;
         margin-bottom: 5px;
@@ -233,21 +233,6 @@
             }
         }
         LoadEmployees();
-    }
-
-    private void UpdateFilteredEmployees()
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchEmployees = employees.ToList();
-        }
-        else
-        {
-            // Lowercase comparison for case-insensitive searching
-            searchEmployees = employees.Where(employee =>
-                employee.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                employee.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
     }
 
     private void DeleteEmployee(int employeeId)
