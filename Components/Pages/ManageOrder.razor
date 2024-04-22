@@ -164,7 +164,7 @@
     private List<Order> orders = new List<Order>();
     private List<Order> searchOrders = new List<Order>();
     private Order editingOrder = new Order();
-    private Database db = new Database("orders-db");
+    private Database db = new Database("orders-db2");
     private string searchTerm;
     private bool isOrderModalVisible = false;
 
@@ -193,14 +193,14 @@
 
     private void HandleOrderValidSubmit()
     {
-        if (editingOrder.TableNumber == 0) // New order
+         // New order
+        
+        db.CreateOrder(editingOrder.TableNumber, editingOrder.CustomerName);
+        if (db.IsInfoCovered == false)
         {
-            db.CreateOrder(editingOrder.TableNumber, editingOrder.CustomerName);
-            if (db.IsInfoCovered == false)
-            {
-                CloseOrderModal();
-            }
+            CloseOrderModal();
         }
+        
         LoadOrders();
     }
 
