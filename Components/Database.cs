@@ -56,7 +56,8 @@ namespace RestaurantManager.Components
 
                     CREATE TABLE IF NOT EXISTS foodorder(
                         table_number INTEGER NOT NULL,
-                        customer_name TEXT NOT NULL
+                        customer_name TEXT NOT NULL,
+                        
                     );
                 ";
                 command.ExecuteNonQuery();

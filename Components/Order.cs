@@ -11,10 +11,13 @@ namespace RestaurantManager.Components
         public int TableNumber { get; set; }
         public string CustomerName { get; set; }
 
-        public Order(int table_number, string customer_name)
+        public List<FoodItem> Items { get; set; }
+
+        public Order(int table_number, string customer_name, List<FoodItem> orderitems)
         { 
             TableNumber = table_number;
             CustomerName = customer_name;
+            Items = orderitems;
         }
 
         public Order () { }
