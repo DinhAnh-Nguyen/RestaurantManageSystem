@@ -16,8 +16,9 @@ namespace RestaurantManager.Components
         public int Age { get; set; }
         public String Position { get; set; }
 
-        public Employee(String firstname, String lastname, String email, String phone, int age, String position)
+        public Employee(int employeeid, String firstname, String lastname, String email, String phone, int age, String position)
         {
+            EmployeeId = employeeid;
             FirstName = firstname;
             LastName = lastname;
             Email = email;
@@ -25,7 +26,6 @@ namespace RestaurantManager.Components
             Age = age;
             Position = position;
         }
-
         public Employee()
         {
 

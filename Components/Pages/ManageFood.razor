@@ -58,7 +58,6 @@
             {
                 <div class="error-handling">You have to fill in all info before you can save.</div>
             }
-
         </div>
     </div>
 }
@@ -185,7 +184,10 @@
         LoadFoodItems();
     }
 
-
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
 
     private void LoadFoodItems()
     {
@@ -199,29 +201,19 @@
         isModalVisible = true;
     }
 
-    private void CloseModal()
-    {
-        isModalVisible = false;
-    }
-
     private void HandleValidSubmit()
     {
-        if (editingItem.Name != null && editingItem.Cost != null && editingItem.Cost != null)
+        if (editingItem.Id == 0) // New item
         {
-            if (editingItem.Id == 0) // New item
-                db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
-            else // Existing item
-                db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
-
-            UpdateFilteredItems();
-            CloseModal();
-        }
-        else
+            db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
+        } 
+        else // Existing item
         {
-            //error_text.Text = "Please enter valid information";
+            db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
         }
+        LoadFoodItems();
+        CloseModal();
     }
-        //LoadFoodItems();
         
     private void UpdateFilteredItems()
     {
@@ -241,12 +233,6 @@
     private void DeleteItem(int id)
     {
         db.RemoveFoodItem(id);
-        UpdateFilteredItems();
-        //LoadFoodItems();
-    }
-
-    private void SearchFood()
-    {
-        
+        LoadFoodItems();
     }
 }

@@ -36,7 +36,7 @@ namespace RestaurantManager.Components
                 var command = connection.CreateCommand();
                 command.CommandText =
                 @"
-                    CREATE TABLE IF NOT EXISTS employees(
+                    CREATE TABLE IF NOT EXISTS employee(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         first_name TEXT NOT NULL,
                         last_name TEXT NOT NULL,
@@ -85,14 +85,14 @@ namespace RestaurantManager.Components
                 command.CommandText =
                 @"
                     SELECT *
-                    FROM employees
+                    FROM employee
                 ";
                 // getting the values from the employee table to create the employee object
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        var id = reader.GetString(0);
+                        int id = reader.GetInt32(0);
                         var firstname = reader.GetString(1);
                         var lastname = reader.GetString(2);
                         var email = reader.GetString(3);
@@ -100,7 +100,7 @@ namespace RestaurantManager.Components
                         int age = reader.GetInt32(5);
                         var position = reader.GetString(6);
 
-                        Returnlist.Add(new Employee(firstname, lastname, email, phonenumber, age, position));
+                        Returnlist.Add(new Employee(id, firstname, lastname, email, phonenumber, age, position));
                     }
                 }
                 connection.Close();
@@ -287,27 +287,35 @@ namespace RestaurantManager.Components
         {
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
+            IsInfoCovered = false;
 
-            using (var connection = new SqliteConnection(DataBaseName))
+            try
             {
-                connection.Open();
+                using (var connection = new SqliteConnection(DataBaseName))
+                {
+                    connection.Open();
 
-                var command = connection.CreateCommand();
+                    var command = connection.CreateCommand();
 
-                command.CommandText =
-                @"
+                    command.CommandText =
+                    @"
                     INSERT INTO employee(first_name, last_name, email, phone_number, age, position)
                     VALUES ($firstname, $lastname, $email, $phonenumber, $age, $position)
                 ";
-                command.Parameters.AddWithValue("$first_name", firstname);
-                command.Parameters.AddWithValue("$last_name", lastname);
-                command.Parameters.AddWithValue("$email", email);
-                command.Parameters.AddWithValue("$phonenumber", phonenumber);
-                command.Parameters.AddWithValue("$age", age);
-                command.Parameters.AddWithValue("$position", position);
+                    command.Parameters.AddWithValue("$firstname", firstname);
+                    command.Parameters.AddWithValue("$lastname", lastname);
+                    command.Parameters.AddWithValue("$email", email);
+                    command.Parameters.AddWithValue("$phonenumber", phonenumber);
+                    command.Parameters.AddWithValue("$age", age);
+                    command.Parameters.AddWithValue("$position", position);
 
-                command.ExecuteNonQuery();
-                connection.Close();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                IsInfoCovered = true;
             }
         }
         public void ModifyEmployee(int id, String firstname, String lastname, String email, String phone, int age, String position)
