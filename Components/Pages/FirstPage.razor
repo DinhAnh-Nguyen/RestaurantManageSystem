@@ -1,0 +1,155 @@
+﻿@page "/manageorder/firstpage"
+
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<div class="modal">
+    <div class="modal-content">
+        <span @onclick="CloseOrderModal" class="close">&times;</span>
+        <EditForm Model="editingOrder" class="form" OnValidSubmit="HandleFirstPageOrderValidSubmit">
+            <div class="item1">
+                <label style="white-space: pre;">Table Number:           <InputNumber class="input-number" @bind-Value="editingOrder.TableNumber" /></label>
+            </div>
+            <div class="item2">
+                <label style="white-space: pre;">Customer Name:       <InputText class="input-text" @bind-Value="editingOrder.CustomerName" /></label>
+            </div>
+            <button type="submit">Next</button>
+        </EditForm>
+        @if (db.IsInfoCovered)
+        {
+            <div class="error-handling">You have to fill in all info before you can save.</div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Styles for item info window */
+    .modal {
+        display: flex;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 25px;
+    }
+
+    .close:hover, .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .form {
+        grid-template-columns: auto auto;
+        gap: 10px;
+    }
+
+    .item1, .item2 {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .input-text, .input-number {
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .item label {
+        margin-bottom: 5px;
+    }
+
+    .form button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 650px;
+    }
+</style>
+
+@code {
+    private List<Order> orders = new List<Order>();
+    private List<Order> searchOrders = new List<Order>();
+    private Order editingOrder = new Order();
+    private Database db = new Database("orders-db2");
+    private string searchTerm;
+    private bool isOrderModalVisible = false;
+
+    protected override void OnInitialized()
+    {
+        db.CreateDB();
+        LoadOrders();
+    }
+
+    private void LoadOrders()
+    {
+        orders = db.LoadDBOrders(); // Load from database or service
+        searchOrders = orders;
+    }
+
+    private void HandleFirstPageOrderValidSubmit()
+    {
+        db.CreateOrder(editingOrder.TableNumber, editingOrder.CustomerName);
+        if (db.IsInfoCovered == false)
+        {
+            NavigationManager.NavigateTo("/manageorder/secondpage");
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/manageorder");
+    }
+
+    private void ShowOrderModal(Order order)
+    {
+        editingOrder = order;
+        isOrderModalVisible = true;
+    }
+
+    private void CloseOrderModal()
+    {
+        isOrderModalVisible = false;
+    }
+
+    private void HandleOrderValidSubmit()
+    {
+        // New order
+
+        db.CreateOrder(editingOrder.TableNumber, editingOrder.CustomerName);
+        if (db.IsInfoCovered == false)
+        {
+            CloseOrderModal();
+        }
+
+        LoadOrders();
+    }
+
+    private void DeleteOrder(int table_number)
+    {
+        db.CancelOrder(table_number);
+        LoadOrders();
+    }
+}

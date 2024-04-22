@@ -1,6 +1,7 @@
 ﻿@page "/manageorder"
 
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <div class="topbar">
     <button @onclick="() => ShowOrderModal(new Order())">Add New Order</button>
@@ -35,14 +36,14 @@
     <div class="modal">
         <div class="modal-content">
             <span @onclick="CloseOrderModal" class="close">&times;</span>
-            <EditForm Model="editingOrder" class="form" OnValidSubmit="HandleOrderValidSubmit">
+            <EditForm Model="editingOrder" class="form" OnValidSubmit="HandleFirstPageOrderValidSubmit">
                 <div class="item1">
                     <label style="white-space: pre;">Table Number:           <InputNumber class="input-number" @bind-Value="editingOrder.TableNumber" /></label>
                 </div>
                 <div class="item2">
                     <label style="white-space: pre;">Customer Name:       <InputText class="input-text" @bind-Value="editingOrder.CustomerName" /></label>
                 </div>
-                <button type="submit">Save</button>
+                <button type="submit">Next</button>
             </EditForm>
             @if (db.IsInfoCovered)
             {
@@ -115,7 +116,7 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        width: 600px;
+        width: 650px;
     }
 
     /* Styles for page info */
@@ -180,10 +181,21 @@
         searchOrders = orders;
     }
 
+    private void HandleFirstPageOrderValidSubmit()
+    {
+        NavigationManager.NavigateTo("/manageorder/secondpage");
+        isOrderModalVisible = true;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/manageorder");
+    }
+
     private void ShowOrderModal(Order order)
     {
         editingOrder = order;
-        isOrderModalVisible = true;
+        NavigationManager.NavigateTo("/manageorder/firstpage");
     }
 
     private void CloseOrderModal()
