@@ -206,28 +206,20 @@
         if (editingItem.Id == 0) // New item
         {
             db.AddFoodItem(editingItem.Name, editingItem.Cost, editingItem.Description, null);
-        } 
+            if (db.IsInfoCovered == false)
+            {
+                CloseModal();
+            }
+        }
         else // Existing item
         {
             db.ModifyFoodItem(editingItem.Id, editingItem.Name, editingItem.Cost, editingItem.Description, null);
+            if (db.IsInfoCovered == false)
+            {
+                CloseModal();
+            }
         }
         LoadFoodItems();
-        CloseModal();
-    }
-        
-    private void UpdateFilteredItems()
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchFoodItems = foodItems.ToList(); 
-        }
-        else
-        {
-            // Lowercase comparison for case-insensitive searching
-            searchFoodItems = foodItems.Where(item => 
-                item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                item.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
     }
 
     private void DeleteItem(int id)

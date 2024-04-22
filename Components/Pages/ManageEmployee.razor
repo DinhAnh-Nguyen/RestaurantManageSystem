@@ -219,13 +219,20 @@
         if (editingEmployee.EmployeeId == 0) // New employee
         {
             db.AddEmployee(editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+            if (db.IsInfoCovered == false)
+            {
+                CloseEmployeeModal();
+            }
         }
         else // Existing employee
         {
             db.ModifyEmployee(editingEmployee.EmployeeId, editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+            if (db.IsInfoCovered == false)
+            {
+                CloseEmployeeModal();
+            }
         }
         LoadEmployees();
-        CloseEmployeeModal();
     }
 
     private void UpdateFilteredEmployees()
