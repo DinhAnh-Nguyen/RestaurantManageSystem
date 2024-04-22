@@ -1,13 +1,8 @@
 ﻿@page "/manageorder"
 
-<h3>ManageOrder</h3>
-
 @inject IJSRuntime JSRuntime
 
-
 <div class="topbar">
-    <input type="text" placeholder="Search orders..." @bind="searchTerm">
-    <button><i class="fa fa-search"></i></button>
     <button @onclick="() => ShowOrderModal(new Order())">Add New Order</button>
 </div>
 
@@ -37,6 +32,114 @@
         </tbody>
     </table>
 </div>
+
+<style>
+    /* Styles for item info window */
+    .modal {
+        display: flex;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-right: 25px;
+    }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .form {
+        grid-template-columns: auto auto;
+        gap: 10px;
+    }
+
+    .item1, .item2, .item3 {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .input-text, .input-number {
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .item label {
+        margin-bottom: 5px;
+    }
+
+    .form button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 600px;
+    }
+
+    /* Styles for page info*/
+    table {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .update, .delete {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 25px;
+    }
+
+    /* Styles for topbar */
+    .topbar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .topbar button {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
 
 @code {
     private Dictionary<int, List<string>> orders;
@@ -101,112 +204,3 @@
         LoadOrders();
     }
 }
-
-<style>
-    /* Styles for item info window */
-    .modal {
-        display: flex;
-        background-color: rgba(0,0,0,0.4);
-    }
-
-    .modal-content {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        background-color: #fefefe;
-        padding: 20px;
-        border: 1px solid #888;
-    }
-
-    .close {
-        color: #aaa;
-        position: absolute;
-        top: 0;
-        right: 0;
-        font-size: 28px;
-        font-weight: bold;
-        margin-top: 10px;
-        margin-right: 25px;
-    }
-
-        .close:hover, .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-    .form {
-        grid-template-columns: auto auto;
-        gap: 10px;
-    }
-
-    .item1, .item2 {
-        display: flex;
-        margin-top: 10px;
-        margin-bottom: 5px;
-    }
-
-    .input-text, .input-number {
-        width: 500px;
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .item label {
-        margin-bottom: 5px;
-    }
-
-    .form button {
-        margin-top: 20px;
-        padding: 5px 10px;
-        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        width: 600px;
-    }
-
-    .update, .delete {
-        display: inline-flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 5px 10px;
-        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        height: 25px;
-    }
-
-    table {
-        margin-top: 20px;
-        width: 100%;
-    }
-
-    .topbar {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 10px;
-    }
-
-        .topbar input[type="text"] {
-            flex-grow: 1;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .topbar button {
-            padding: 5px 10px;
-            background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-</style>

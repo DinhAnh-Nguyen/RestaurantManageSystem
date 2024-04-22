@@ -1,13 +1,8 @@
 ﻿@page "/manageemployee"
 
-<h3>ManageEmployee</h3>
-
 @inject IJSRuntime JSRuntime
 
-
 <div class="topbar">
-    <input type="text" placeholder="Search employees..." @bind="searchTerm" @oninput="UpdateFilteredEmployees">
-    <button><i class="fa fa-search"></i></button>
     <button @onclick="() => ShowEmployeeModal(new Employee())">Add New Employee</button>
 </div>
 
@@ -66,70 +61,6 @@
             </EditForm>
         </div>
     </div>
-}
-
-@code {
-    private List<Employee> employees = new List<Employee>();
-    private List<Employee> searchEmployees = new List<Employee>();
-    private Employee editingEmployee = new Employee();
-    private Database db = new Database("employees-db");
-    private string searchTerm;
-    private bool isEmployeeModalVisible = false;
-
-    protected override void OnInitialized()
-    {
-        db.CreateDB();
-        LoadEmployees();
-    }
-
-    private void LoadEmployees()
-    {
-        employees = db.LoadDBEmployee(); // Load from database or service
-        searchEmployees = employees;
-    }
-
-    private void ShowEmployeeModal(Employee employee)
-    {
-        editingEmployee = employee;
-        isEmployeeModalVisible = true;
-    }
-
-    private void CloseEmployeeModal()
-    {
-        isEmployeeModalVisible = false;
-    }
-
-    private void HandleEmployeeValidSubmit()
-    {
-        if (editingEmployee.EmployeeId == 0) // New employee
-            db.AddEmployee(editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
-        else // Existing employee
-            db.ModifyEmployee(editingEmployee.EmployeeId, editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
-
-        LoadEmployees();
-        CloseEmployeeModal();
-    }
-
-    private void UpdateFilteredEmployees()
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchEmployees = employees.ToList();
-        }
-        else
-        {
-            // Lowercase comparison for case-insensitive searching
-            searchEmployees = employees.Where(employee =>
-                employee.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                employee.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-    }
-
-    private void DeleteEmployee(int employeeId)
-    {
-        db.RemoveEmployee(employeeId);
-        LoadEmployees();
-    }
 }
 
 <style>
@@ -198,6 +129,12 @@
         width: 600px;
     }
 
+    /* Styles for page info*/
+    table {
+        margin-top: 20px;
+        width: 100%;
+    }
+
     .update, .delete {
         display: inline-flex;
         justify-content: space-around;
@@ -211,17 +148,7 @@
         height: 25px;
     }
 
-    /* Styles for top-bar
-        .topbar { display: flex; justify-content: space-between; padding: 10px; }
-        .search-container input, .add-form input { width: 200px; margin-right: 10px; }
-        .search-container button { padding: 5px 10px; background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97)); color: white; border: none; border-radius: 5px; cursor: pointer; }
-        input[type="text"], input[type="number"], textarea { width: 100%; } */
-
-    table {
-        margin-top: 20px;
-        width: 100%;
-    }
-
+    /* Styles for topbar */
     .topbar {
         display: flex;
         flex-wrap: nowrap;
@@ -230,19 +157,80 @@
         gap: 10px;
     }
 
-        .topbar input[type="text"] {
-            flex-grow: 1;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .topbar button {
-            padding: 5px 10px;
-            background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .topbar button {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        padding: 5px 10px;
+        background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 </style>
+
+@code {
+    private List<Employee> employees = new List<Employee>();
+    private List<Employee> searchEmployees = new List<Employee>();
+    private Employee editingEmployee = new Employee();
+    private Database db = new Database("employees-db");
+    private string searchTerm;
+    private bool isEmployeeModalVisible = false;
+
+    protected override void OnInitialized()
+    {
+        db.CreateDB();
+        LoadEmployees();
+    }
+
+    private void LoadEmployees()
+    {
+        employees = db.LoadDBEmployee(); // Load from database or service
+        searchEmployees = employees;
+    }
+
+    private void ShowEmployeeModal(Employee employee)
+    {
+        editingEmployee = employee;
+        isEmployeeModalVisible = true;
+    }
+
+    private void CloseEmployeeModal()
+    {
+        isEmployeeModalVisible = false;
+    }
+
+    private void HandleEmployeeValidSubmit()
+    {
+        if (editingEmployee.EmployeeId == 0) // New employee
+            db.AddEmployee(editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+        else // Existing employee
+            db.ModifyEmployee(editingEmployee.EmployeeId, editingEmployee.FirstName, editingEmployee.LastName, editingEmployee.Email, editingEmployee.Phone, editingEmployee.Age, editingEmployee.Position);
+
+        LoadEmployees();
+        CloseEmployeeModal();
+    }
+
+    private void UpdateFilteredEmployees()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchEmployees = employees.ToList();
+        }
+        else
+        {
+            // Lowercase comparison for case-insensitive searching
+            searchEmployees = employees.Where(employee =>
+                employee.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                employee.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private void DeleteEmployee(int employeeId)
+    {
+        db.RemoveEmployee(employeeId);
+        LoadEmployees();
+    }
+}

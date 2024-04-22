@@ -2,12 +2,8 @@
 
 @inject IJSRuntime JSRuntime
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 <div class="topbar">
-        <input type="text" placeholder="Search food item..." @bind="searchTerm" @oninput="UpdateFilteredItems">
-        <button><i class="fa fa-search"></i></button>
-        <button @onclick="() => ShowModal(new FoodItem())">Add New Item</button>
+    <button @onclick="() => ShowModal(new FoodItem())">Add New Item</button>
 </div>
 
 <div class="body-container">
@@ -133,6 +129,12 @@
         width: 600px;
     }
 
+    /* Styles for page info*/
+    table {
+        margin-top: 20px; 
+        width: 100%;
+    }
+
     .update, .delete {
         display: inline-flex;
         justify-content: space-around;
@@ -146,17 +148,7 @@
         height: 25px;
     }
 
-    /* Styles for top-bar
-    .topbar { display: flex; justify-content: space-between; padding: 10px; }
-    .search-container input, .add-form input { width: 200px; margin-right: 10px; }
-    .search-container button { padding: 5px 10px; background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97)); color: white; border: none; border-radius: 5px; cursor: pointer; }
-    input[type="text"], input[type="number"], textarea { width: 100%; } */
-
-    table {
-        margin-top: 20px; 
-        width: 100%;
-    }
-
+    /* Styles for topbar */
     .topbar {
         display: flex;
         flex-wrap: nowrap;
@@ -165,14 +157,11 @@
         gap: 10px;
     }
 
-    .topbar input[type="text"] {
-        flex-grow: 1;
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
     .topbar button {
+        display: inline-flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
         padding: 5px 10px;
         background: linear-gradient(180deg, rgb(6, 0, 97), rgb(71, 0, 97));
         color: white;
