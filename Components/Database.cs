@@ -57,7 +57,7 @@ namespace RestaurantManager.Components
                     CREATE TABLE IF NOT EXISTS foodorder(
                         table_number INTEGER NOT NULL,
                         customer_name TEXT NOT NULL,
-                        
+                        food_items TEXT
                     );
                 ";
                 command.ExecuteNonQuery();
@@ -152,7 +152,6 @@ namespace RestaurantManager.Components
                         {
 
                         }
-                        
 
                         Returnlist.Add(new FoodItem(id, foodname, price, description, foodImage));
                         Debug.WriteLine($"Food Item info: {id}, {foodname}, {price}, {description}");
@@ -164,9 +163,14 @@ namespace RestaurantManager.Components
         }
 
         // returns a dictionary of food item orders. the dictionary has the table as a key and a list of food items associated to it
+        // a bit messy because of being able to add multiple order items to the same table entry
+        // using a dictionary with a touple as a key so we store the table number and order number there
+        // then using a list of Strings we add the food items to that associated touple
         public List<Order> LoadDBOrders()
         {
             List<Order> Returnlist = new List<Order>();
+
+            Dictionary<(int, String), List<String>> tableOrders = new Dictionary<(int, String), List<String>>();
 
             String DataBaseName = "Data Source=" + databaseName + ".db";
 
@@ -178,7 +182,7 @@ namespace RestaurantManager.Components
 
                 command.CommandText =
                 @"
-                    SELECT *
+                    SELECT table_number, customer_name
                     FROM foodorder
                 ";
 
@@ -187,17 +191,53 @@ namespace RestaurantManager.Components
                     while (reader.Read())
                     {
                         int table_number = reader.GetInt32(0);
-                        var customer_name = reader.GetString(1);
+                        String customer_name = reader.GetString(1);
 
-                        Returnlist.Add(new Order(table_number, customer_name));
-                        Debug.WriteLine($"Order info: {table_number}, {customer_name}");
+                        using (var itemConnection = new SqliteConnection(DataBaseName))
+                        {
+                            itemConnection.Open();
+
+                            var itemCommand = itemConnection.CreateCommand();
+
+                            itemCommand.CommandText =
+                            @"
+                                SELECT food_items
+                                FROM foodorder
+                                WHERE table_number = $tablenumber
+                            ";
+                            itemCommand.Parameters.AddWithValue("$tablenumber", table_number);
+
+                            List<string> items = new List<string>();
+
+                            using (var itemReader = itemCommand.ExecuteReader())
+                            {
+                                while (itemReader.Read())
+                                {
+                                    if (tableOrders.ContainsKey((table_number, customer_name)))
+                                    {
+                                        //making sure there are no duplicate entries
+                                        if (!tableOrders[(table_number, customer_name)].Contains(itemReader.GetString(0)))
+                                            tableOrders[(table_number, customer_name)].Add(itemReader.GetString(0));
+                                    }
+                                    else
+                                    {
+                                        tableOrders.Add((table_number, customer_name), new List<string> { itemReader.GetString(0) });
+                                    }
+                                }
+                            }
+                            Debug.WriteLine($"Order info: {table_number}, {customer_name}");
+                        }
                     }
                 }
                 connection.Close();
             }
+            //this is the magic that makes it all work. turning the dictionary into order objects
+            foreach (var key in tableOrders.Keys)
+            {
+                Returnlist.Add(new Order(key.Item1, key.Item2, tableOrders[key]));
+            }
 
             return Returnlist;
-
         }
 
         // add food items to the database with photos
@@ -356,7 +396,7 @@ namespace RestaurantManager.Components
             }
         }
         // add a food order to the database
-        public void CreateOrder(int table_number, string customer_name)
+        public void CreateOrder(int table_number, string customer_name, List<String> items)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
             IsInfoCovered = false;
@@ -369,15 +409,21 @@ namespace RestaurantManager.Components
 
                     var command = connection.CreateCommand();
 
-                    command.CommandText =
-                    @"
-                INSERT INTO foodorder(table_number, customer_name)
-                VALUES ($tablenumber, $customername)
-                ";
-                    command.Parameters.AddWithValue("$tablenumber", table_number);
-                    command.Parameters.AddWithValue("$customername", customer_name);
+                    foreach (var item in items)
+                    {
+                        command.Parameters.Clear();
+                        command.CommandText =
+                        @"
+                        INSERT INTO foodorder(table_number, customer_name, food_items)
+                        VALUES ($tablenumber, $customername, $item)
+                        ";
+                        command.Parameters.AddWithValue("$tablenumber", table_number);
+                        command.Parameters.AddWithValue("$customername", customer_name);
+                        command.Parameters.AddWithValue("$item", item);
 
-                    command.ExecuteNonQuery();
+                        command.ExecuteNonQuery();
+
+                    }
 
                     connection.Close();
                 }
