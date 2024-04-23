@@ -19,13 +19,18 @@
         <tbody>
             @foreach (var order in searchOrders)
             {
+
                 <tr>
                     <td>@order.TableNumber</td>
                     <td>@order.CustomerName</td>
-                    @foreach (var food in @order.Items)
-                    {
-                        <td>@food.Name</td>
-                    }
+                    <td>
+                        @foreach (var food in @order.Items)
+                        {
+                            @food
+
+                            <br>
+                        }
+                    </td>
                     
                     <td>
                         <button class="delete" @onclick="() => DeleteOrder(order.TableNumber)">Delete</button>
@@ -51,7 +56,7 @@
                 <div class="grid-container">
                     @foreach (var foodItem in FoodItems)
                     {
-                        <div class="grid-item @(SelectedFoodItems.Contains(foodItem) ? "selected" : "")" @onclick="() => SelectFoodItem(foodItem)">
+                        <div class="grid-item @(SelectedFoodItems.Contains(foodItem.Name) ? "selected" : "")" @onclick="() => SelectFoodItem(foodItem)">
                             <h2>@foodItem.Name</h2>
                             <p>@foodItem.Cost</p>
                             <p>@foodItem.Description</p>
@@ -70,11 +75,11 @@
 
 @code {
     private List<FoodItem> FoodItems { get; set; } = new List<FoodItem>();
-    private List<FoodItem> SelectedFoodItems { get; set; } = new List<FoodItem>();
+    private List<String> SelectedFoodItems { get; set; } = new List<String>();
     private List<Order> orders = new List<Order>();
     private List<Order> searchOrders = new List<Order>();
     private Order editingOrder = new Order();
-    private Database db = new Database("Database1");
+    private Database db = new Database("Database3");
 
     private string searchTerm;
     private bool isOrderModalVisible = false;
@@ -82,13 +87,13 @@
     private void SelectFoodItem(FoodItem foodItem)
     {
         // Add or remove the item from the selected list
-        if (SelectedFoodItems.Contains(foodItem))
+        if (SelectedFoodItems.Contains(foodItem.Name))
         {
-            SelectedFoodItems.Remove(foodItem);
+            SelectedFoodItems.Remove(foodItem.Name);
         }
         else
         {
-            SelectedFoodItems.Add(foodItem);
+            SelectedFoodItems.Add(foodItem.Name);
         }
     }
 

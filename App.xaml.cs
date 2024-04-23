@@ -19,9 +19,7 @@ namespace RestaurantManager
             database.AddFoodItem("Sushi", 23.59, "Delicious platter of sushi", "Sushi.png");
             database.AddFoodItem("Sushi2", 23.59, "Delicious platter of sushi", "Sushi.png");
             database.LoadDBFood();
-            database.CreateOrder(1, "John Doe");
-            database.LoadDBOrders();
-
+           
         }
     }
 }
