@@ -57,7 +57,7 @@
                     @foreach (var foodItem in FoodItems)
                     {
                         <div class="grid-item @(SelectedFoodItems.Contains(foodItem.Name) ? "selected" : "")" @onclick="() => SelectFoodItem(foodItem)">
-                            <h2>@foodItem.Name</h2>
+                            <h5>@foodItem.Name</h5>
                             <p>@foodItem.Cost</p>
                             <p>@foodItem.Description</p>
                         </div>
@@ -150,7 +150,9 @@
     }
 
     .grid-container {
+        padding-top: 20px;
         display: grid;
+        align-items: center;
         grid-template-columns: repeat(5, 1fr);
         gap: 10px;
     }
@@ -159,6 +161,10 @@
         background-color: #f7f7f7;
         padding: 10px;
         border: 1px solid #ddd;
+    }
+
+    p {
+        margin-bottom: 1px;
     }
 
     .grid-item.selected {
@@ -221,7 +227,7 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        width: 600px;
+        width: 650px;
     }
 
     /* Styles for page info */
