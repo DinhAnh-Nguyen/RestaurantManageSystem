@@ -137,8 +137,9 @@
         if (db.IsInfoCovered == false)
         {
             CloseOrderModal();
+            SelectedFoodItems.Clear();
         }
-        SelectedFoodItems.Clear();
+        
         LoadOrders();
     }
 

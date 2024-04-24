@@ -360,21 +360,26 @@ namespace RestaurantManager.Components
         public void ModifyEmployee(int id, String firstname, String lastname, String email, String phone, int age, String position)
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
-
-            using (var connection = new SqliteConnection(DataBaseName))
+            try {
+                using (var connection = new SqliteConnection(DataBaseName))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = "UPDATE employee SET first_name = $firstname, last_name = $lastname, email = $email, phone_number = $phone, age = $age, position = $position WHERE id = $id";
+                    command.Parameters.AddWithValue("$id", id);
+                    command.Parameters.AddWithValue("$firstname", firstname);
+                    command.Parameters.AddWithValue("$lastname", lastname);
+                    command.Parameters.AddWithValue("$email", email);
+                    command.Parameters.AddWithValue("$phone", phone);
+                    command.Parameters.AddWithValue("$age", age);
+                    command.Parameters.AddWithValue("$position", position);
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
             {
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText = "UPDATE employee SET first_name = $firstname, last_name = $lastname, email = $email, phone_number = $phone, age = $age, position = $position WHERE id = $id";
-                command.Parameters.AddWithValue("$id", id);
-                command.Parameters.AddWithValue("$firstname", firstname);
-                command.Parameters.AddWithValue("$lastname", lastname);
-                command.Parameters.AddWithValue("$email", email);
-                command.Parameters.AddWithValue("$phone", phone);
-                command.Parameters.AddWithValue("$age", age);
-                command.Parameters.AddWithValue("$position", position);
-                command.ExecuteNonQuery();
-                connection.Close();
+                IsInfoCovered = true;
             }
         }
 
@@ -405,6 +410,11 @@ namespace RestaurantManager.Components
         {
             String DataBaseName = "Data Source=" + databaseName + ".db";
             IsInfoCovered = false;
+
+            if (customer_name == null)
+            {
+                IsInfoCovered = true;
+            }
 
             try
             {
