@@ -1,4 +1,11 @@
-﻿@page "/managefood"
+﻿
+@*
+//Group 7
+//Names: Abdurahman, Anamika, Dinh Anh, Max
+//Project Description: This is our Restaraunt Manager application.
+//In this application we allow the user to add employees, food items, and food orders in a restaraunt
+*@
+@page "/managefood"
 
 @inject IJSRuntime JSRuntime
 
@@ -222,6 +229,7 @@
         LoadFoodItems();
     }
 
+    // Deletes food item
     private void DeleteItem(int id)
     {
         db.RemoveFoodItem(id);

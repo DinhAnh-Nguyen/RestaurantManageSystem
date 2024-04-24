@@ -10,6 +10,11 @@ using System.IO;
 using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel.Communication;
 
+//Group 7
+//Names: Abdurahman, Anamika, Dinh Anh, Max
+//Project Description: This is our Restaraunt Manager application. 
+//In this application we allow the user to add employees, food items, and food orders in a restaraunt
+
 namespace RestaurantManager.Components
 {
     internal class Database
